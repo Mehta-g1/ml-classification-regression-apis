@@ -1,55 +1,55 @@
 # Django Machine Learning API Project
 
-A Django-based web application providing REST APIs to run predictions for 5 different datasets (Classification and Regression) using pre-trained Machine Learning models (4 models per dataset, total 20 combinations).
+A production-ready Django web application providing REST APIs to run predictions for three different datasets (Classification and Regression) using pre-trained Machine Learning models. The application supports a unified input interface, accepting both **JSON payloads** (`application/json`) and **Form-Data** / **URL-Encoded** payloads, backed by fast-fail input validation.
 
 ---
 
-## Project Structure
+## Project Structure & Files
 
-Here is the complete project directory structure:
+Here is the complete project directory structure with explanations of the primary components:
 
 ```text
 ML Project/
 │
-├── APIs/                     # Django app containing API views and predictors
-│   ├── predictor.py          # Core logic for loading pickled models/scalers and making predictions
-│   ├── views.py              # API view handlers (validating inputs, parsing requests)
-│   ├── urls.py               # API-specific URL routing
-│   ├── apps.py               # Django app configuration
-│   └── models.py             # Django database models
+├── APIs/                       # Django application package for API views & logic
+│   ├── predictor.py            # Contains ML prediction wrappers that load pickeled scalers and models
+│   ├── views.py                # Endpoint request handlers; parses formats, validates fields, catches errors
+│   ├── urls.py                 # App-level routing mapping endpoints to views
+│   ├── apps.py                 # App configuration registry
+│   └── models.py               # Django DB models (unused, stateless architecture)
 │
-├── Datasets/                 # Source datasets used for training models
+├── Datasets/                   # Raw training data sourced from Notebook training
 │   ├── Classification datasets/
-│   │   ├── Diabetes/
-│   │   └── Heart Disease/
+│   │   ├── Diabetes/           # diabetes_dataset.csv
+│   │   └── Heart Disease/      # heart.csv
 │   └── Regression datasets/
-│       ├── California Housing/
-│       ├── Concrete Data/
-│       └── Wine Quality/
+│       └── California Housing/ # california_housing.csv
 │
-├── ML/                       # Django project main configuration directory
-│   ├── settings.py           # Project settings (middleware, installed apps, database config)
-│   ├── urls.py               # Main URL configuration
-│   ├── wsgi.py / asgi.py     # Deployment entry points
+├── ML/                         # Project settings package
+│   ├── settings.py             # Global Django configurations, middleware, and installed apps
+│   ├── urls.py                 # Root URL router (routes /predict/* to APIs.urls)
+│   ├── wsgi.py / asgi.py       # WSGI/ASGI gateways for deployment servers
 │   └── __init__.py
 │
-├── ML_models and scalers/    # Pre-trained models and scaler pipelines (.pkl files)
+├── ML_models and scalers/      # Binary serialized model pipelines (.pkl format)
 │   ├── ML_Models/
-│   │   ├── Diabetes/         # Pickled models for diabetes prediction
-│   │   └── Heart/            # Pickled models for heart disease prediction
-|   |
-│   └── Scalers/              # Standard scalers used for normalizing inputs
+│   │   ├── Diabetes/           # Pickled classifiers (Logistic Regression, kNN, Decision Tree, SVC)
+│   │   ├── Heart/              # Pickled classifiers (Logistic Regression, kNN, Decision Tree, SVC)
+│   │   └── California_Housing/ # Pickled regressors (Linear Regression, Ridge, kNN, Tree, SVR)
+│   └── Scalers/                # Scikit-learn StandardScaler/preprocessing pipelines
 │       ├── diabetes_scaler.pkl
-│       └── heart_scaler.pkl
+│       ├── heart_scaler.pkl
+│       └── california_housing.pkl
 │
-├── Notebooks/                # Jupyter Notebooks used for model exploration & training
+├── Notebooks/                  # Research, modeling, and training notebooks
 │   ├── Classification/
-│   │   ├── diabetes.ipynb    # Model training and evaluation for diabetes
-│   │   └── heart.ipynb       # Model training and evaluation for heart disease
-│   └── Regression/           # Jupyter Notebooks for regression training
+│   │   ├── diabetes.ipynb      # Training & evaluation of classification models for Diabetes
+│   │   └── heart.ipynb         # Training & evaluation of classification models for Heart Disease
+│   └── Regression/
+│       └── california_housing.ipynb # Training & evaluation of regression models for housing price index
 │
-├── manage.py                 # Django command-line utility
-└── requirements.txt          # Project dependencies (Django, pandas, scikit-learn, etc.)
+├── manage.py                   # Django CLI administrative entry point
+└── requirements.txt            # System dependencies (Django, pandas, scikit-learn, etc.)
 ```
 
 ---
@@ -57,90 +57,238 @@ ML Project/
 ## Machine Learning Models Supported
 
 ### Classification (Heart Disease, Diabetes)
-1. **Logistic Regression** (Code: `1` or `LogisticRegression`)
-2. **K-Neighbors Classifier (kNN)** (Code: `2` or `KNeighborsClassifier`)
-3. **Decision Tree Classifier** (Code: `3` or `DecisionTreeClassifier`)
-4. **Support Vector Classifier (SVC)** (Code: `4` or `SVC`)
+1. **Logistic Regression** (Name: `LogisticRegression`)
+2. **K-Neighbors Classifier (kNN)** (Name: `KNeighborsClassifier`)
+3. **Decision Tree Classifier** (Name: `DecisionTreeClassifier`)
+4. **Support Vector Classifier (SVC)** (Name: `SVC`)
 
-### Regression (California Housing, Concrete, Wine Quality)
-1. **Linear Regression** (Code: `1` or `LinearRegression`)
-2. **K-Neighbors Regressor** (Code: `2` or `KNeighborsRegressor`)
-3. **Decision Tree Regressor** (Code: `3` or `DecisionTreeRegressor`)
-4. **Support Vector Regressor (SVR)** (Code: `4` or `SVR`)
+### Regression (California Housing)
+1. **Linear Regression** (Name: `LinearRegression`)
+2. **Ridge Regression** (Name: `Ridge`)
+3. **K-Neighbors Regressor** (Name: `KNeighborsRegressor`)
+4. **Decision Tree Regressor** (Name: `DecisionTreeRegressor`)
+5. **Support Vector Regressor (SVR)** (Name: `SVR`)
 
 ---
 
-## API Endpoints
+## Request Formats & Payload Flexibility
 
-All prediction API endpoints accept `POST` requests.
+All endpoints support two request payload types:
+1. **JSON Payload** (`Content-Type: application/json`):
+   ```json
+   {
+     "model-name": "LogisticRegression",
+     "age": 58,
+     ...
+   }
+   ```
+2. **Form-Data / URL-Encoded** (`Content-Type: application/x-www-form-urlencoded` or `multipart/form-data`):
+   Key-value pairs sent in the POST request body.
+
+> [!NOTE]
+> All endpoints are restricted to the `POST` method. Any `GET` requests will automatically return `405 Method Not Allowed`.
+
+---
+
+## API Endpoints & Dataset Examples
 
 ### 1. Predict Diabetes
 * **URL:** `/predict/diabetes/`
 * **Method:** `POST`
-* **Required Parameters:**
-  * `model-name`: String (`LogisticRegression`, `KNeighborsClassifier`, `DecisionTreeClassifier`, or `SVC`)
-  * `age`: Float/Int
-  * `bmi`: Float
-  * `family_history_diabetes`: `1` (Yes) or `0` (No)
-  * `hypertension_history`: `1` (Yes) or `0` (No)
-  * `glucose_fasting`: Float
-  * `hba1c`: Float
-  * `physical_activity_minutes_per_week`: Float/Int
-  * `cardiovascular_history`: `1` (Yes) or `0` (No)
-  * `gender`: String (`male`, `female`, or `other`)
-  * `smoking_status`: String (`never`, `former`, etc.)
+* **Validation Rules:**
+  * Categorical mapping is automatically applied for `gender` (converted to dummy columns `gender_Male`, `gender_Other`) and `smoking_status` (converted to `smoking_status_Former`, `smoking_status_Never`).
+  * Features `family_history_diabetes` and `hypertension_history` require string values `'1'` (Yes) or `'0'` (No).
+* **Dataset Example (From `diabetes.ipynb` Index 0):**
+  ```json
+  {
+    "model-name": "LogisticRegression",
+    "age": "58",
+    "bmi": "30.0",
+    "family_history_diabetes": "0",
+    "hypertension_history": "0",
+    "glucose_fasting": "136",
+    "hba1c": "8.18",
+    "physical_activity_minutes_per_week": "215",
+    "cardiovascular_history": "0",
+    "gender": "Male",
+    "smoking_status": "Never"
+  }
+  ```
+* **Sample 200 Response:**
+  ```json
+  {
+    "status": "Ok",
+    "message": "Success",
+    "model-name": "LogisticRegression",
+    "output": {
+      "Prediction": 1,
+      "model-accuracy": {
+        "sccuracy_score": 0.8847,
+        "f1_score": 0.8946069469835466,
+        "recall_score": 0.8175591011611394
+      }
+    }
+  }
+  ```
 
 ---
 
 ### 2. Predict Heart Disease
 * **URL:** `/predict/heart/`
 * **Method:** `POST`
-* **Required Parameters:**
-  * `model-name`: String (`LogisticRegression`, `KNeighborsClassifier`, `DecisionTreeClassifier`, or `SVC`)
-  * `age`: Int
-  * `sex`: Int (`1` = Male, `0` = Female)
-  * `cp`: Chest Pain type (`0` to `3`)
-  * `trestbps`: Resting Blood Pressure
-  * `chol`: Serum Cholestoral in mg/dl
-  * `fbs`: Fasting Blood Sugar > 120 mg/dl (`1` = true, `0` = false)
-  * `restecg`: Resting Electrocardiographic results (`0` to `2`)
-  * `thalach`: Maximum heart rate achieved
-  * `exang`: Exercise induced angina (`1` = yes, `0` = no)
-  * `oldpeak`: ST depression induced by exercise
-  * `slope`: The slope of the peak exercise ST segment (`0` to `2`)
-  * `ca`: Number of major vessels colored by flourosopy (`0` to `4`)
-  * `thal`: Thalassemia (`0` = normal, `1` = fixed defect, `2` = reversible defect)
-
-
+* **Dataset Example (From `heart.ipynb` Index 941):**
+  ```json
+  {
+    "model-name": "LogisticRegression",
+    "age": "52",
+    "sex": "0",
+    "cp": "2",
+    "trestbps": "136",
+    "chol": "196",
+    "fbs": "0",
+    "restecg": "0",
+    "thalach": "169",
+    "exang": "0",
+    "oldpeak": "0.1",
+    "slope": "1",
+    "ca": "0",
+    "thal": "2"
+  }
+  ```
+* **Sample 200 Response:**
+  ```json
+  {
+    "status": "Ok",
+    "message": "Success",
+    "model-name": "LogisticRegression",
+    "output": {
+      "Prediction": 1,
+      "model-accuracy": {
+        "accuracy_score": 0.7763157894736842,
+        "recall_score": 0.8888888888888888,
+        "f1_score": 0.7901234567901234
+      }
+    }
+  }
+  ```
 
 ---
 
-## Installation & Running the Server
+### 3. Predict California Housing Prices
+* **URL:** `/predict/california-housing/`
+* **Method:** `POST`
+* **Dataset Example (From `california_housing.ipynb` Index 0):**
+  ```json
+  {
+    "model-name": "LinearRegression",
+    "MedInc": "8.3252",
+    "HouseAge": "41.0",
+    "AveRooms": "6.984127",
+    "AveBedrms": "1.023810",
+    "Population": "322.0",
+    "AveOccup": "2.555556",
+    "Latitude": "37.88",
+    "Longitude": "-122.23"
+  }
+  ```
+* **Sample 200 Response:**
+  ```json
+  {
+    "status": "Ok",
+    "message": "Success",
+    "model-name": "LinearRegression",
+    "output": {
+      "Prediction": 4.126220702280297,
+      "model-accuracy": {
+        "r2_score": 0.6009790143129108,
+        "mean_absolute_error": 0.5366527228153435,
+        "mean_squared_error": 0.5444842122132871
+      }
+    }
+  }
+  ```
 
-### 1. Prerequisites
-Ensure you have Python 3.10+ installed.
+---
 
-### 2. Set Up Virtual Environment & Dependencies
+## Standard Error Response Structures
+
+### 1. HTTP 400 Bad Request
+Occurs if the `model-name` parameter is missing or has an unsupported value.
+* **Response Content:**
+  ```json
+  {
+    "status": "Bad Request",
+    "message": "Wrong Model Name: 'InvalidModel'. Available options: ['LogisticRegression', 'KNeighborsClassifier', 'DecisionTreeClassifier', 'SVC']",
+    "model-name": "InvalidModel",
+    "output": {
+      "model_id": null,
+      "prediction": "null"
+    }
+  }
+  ```
+
+### 2. HTTP 422 Unprocessable Entity
+Occurs if required fields are missing or cannot be parsed into numeric values.
+* **Response Content:**
+  ```json
+  {
+    "status": "Unprocessable Entity",
+    "message": "Input validation failed. Please check the errors field for details.",
+    "errors": [
+      "Field 'age' is required.",
+      "Field 'bmi' must be numeric (received: 'invalid_text')."
+    ],
+    "model-name": "LogisticRegression",
+    "output": {
+      "model_id": 1,
+      "prediction": "null"
+    }
+  }
+  ```
+
+### 3. HTTP 405 Method Not Allowed
+Occurs if a method other than `POST` (e.g. `GET`) is sent to the endpoint.
+* **Response Content:**
+  ```html
+  <h1>Method Not Allowed (GET)</h1>
+  ```
+
+### 4. HTTP 500 Internal Server Error
+Occurs if the prediction engine encounters a system error (e.g. missing serialized model binaries or scaling pipeline failures).
+* **Response Content:**
+  ```json
+  {
+    "status": "Internal Server Error",
+    "message": "Prediction engine failure: Failed to load model/scaler or perform prediction: ...",
+    "model-name": "LogisticRegression",
+    "output": {
+      "model_id": 1,
+      "prediction": "null"
+    }
+  }
+  ```
+
+---
+
+## Setup & Run Instructions
+
+### 1. Set Up Virtual Environment & Dependencies
 ```bash
-# Create a virtual environment
+# Create and activate virtual environment
 python -m venv .venv
-
-# Activate virtual environment
-# On Windows (cmd):
 .venv\Scripts\activate
-# On Windows (PowerShell):
-.venv\Scripts\Activate.ps1
 
 # Install requirements
 pip install -r requirements.txt
 ```
 
-### 3. Run Migrations & Start Server
+### 2. Run Database Migrations
 ```bash
-# Run database migrations
 python manage.py migrate
+```
 
-# Run the Django development server
+### 3. Start the Django Server
+```bash
 python manage.py runserver
 ```
-The server will start at `http://127.0.0.1:8000/`.
+The application will run locally at `http://127.0.0.1:8000/`.

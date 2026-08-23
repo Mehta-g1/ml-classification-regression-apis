@@ -17,8 +17,13 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 import APIs
+from django.http import HttpResponse
+
+def HomeView(request):
+    return HttpResponse('HomePage')
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('predict/', include('APIs.urls'))
+    path('predict/', include('APIs.urls')),
+    path('', HomeView)
 ]
