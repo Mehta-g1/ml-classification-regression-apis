@@ -197,33 +197,94 @@ def California_Housing_predictor(request, data:pd.DataFrame, model_code:int):
 
     model = ''
     scaler = ''
-    # Retrieve the model file path based on the model code mapping
+
     model_path = California_Model_Paths.get(model_code)
     if not model_path:
         raise ValueError(f"Invalid model code: {model_code}")
 
     try: 
-        # 1. Load the fitted scaler object
+
         with open(scaler_path, 'rb') as f:
             scaler = pickle.load(f)
         
-        # 2. Load the trained machine learning model
         with open(model_path, 'rb') as f:
             model = pickle.load(f)
             
-            # 3. Transform input data using the loaded scaler and perform prediction
             scaled_data = scaler.transform(data)
             pred = model.predict(scaled_data)
 
-            # 4. Return both the prediction and the performance scores of the selected model
             response = {
                 'Prediction': pred[0],
                 'model-accuracy': California_Housing_Scores.get(model_code)
             }
             return response
     except Exception as e:
-        # Print error details to terminal for developer tracking and re-raise
         print(f"California Housing predictor error: {e}")
         raise RuntimeError(f"Failed to load model/scaler or perform prediction: {e}") from e
 
 
+def Concrete_predictor(request, data:pd.DataFrame, model_code:int):
+    Concrete_Scores = {
+        1 : {
+            'r2_score' : 0.6128899126006704,
+            'mean_absolute_error' : 8.186575235450505,
+            'mean_squared_error' : 104.92832620839133,
+        },
+        2 : {
+            'r2_score' : 0.6133465755293246,
+            'mean_absolute_error' : 8.186766318650339,
+            'mean_squared_error' : 104.80454520059837,
+        },
+        3 : {
+            'r2_score' : 0.8030112619681574,
+            'mean_absolute_error' : 5.492273492952563,
+            'mean_squared_error' : 53.39488490844302,
+        },
+        4 : {
+            'r2_score' : 0.8797892499240952,
+            'mean_absolute_error' : 3.7900905486098186,
+            'mean_squared_error' : 32.583787424553115,
+        },
+        5 : {
+            'r2_score' : 0.8867083187224074,
+            'mean_absolute_error' : 3.9354438747834637,
+            'mean_squared_error' : 30.7083356304523,
+        }
+    }
+
+    Concrete_Model_Paths = {
+        1: Path.cwd()/'Ml_models and scalers'/'ML_Models'/'Concrete'/ 'linear_model.pkl',
+        2: Path.cwd()/'Ml_models and scalers'/'ML_Models'/'Concrete'/ 'ridge_model.pkl',
+        3: Path.cwd()/'Ml_models and scalers'/'ML_Models'/'Concrete'/ 'kNN_model.pkl',
+        4: Path.cwd()/'Ml_models and scalers'/'ML_Models'/'Concrete'/ 'tree_model.pkl',
+        5: Path.cwd()/'Ml_models and scalers'/'ML_Models'/'Concrete'/ 'svr_model.pkl',
+    }
+
+    scaler_path = Path.cwd()/'Ml_models and scalers'/'Scalers'/'concrete_scaler.pkl'
+
+    model = ''
+    scaler = ''
+
+    model_path = Concrete_Model_Paths.get(model_code)
+    if not model_path:
+        raise ValueError(f'Invalid model code: {model_code}')
+    
+    try:
+        with open(scaler_path, 'rb') as f:
+            scaler = pickle.load(f)
+        
+        with open(model_path, 'rb') as f:
+            model = pickle.load(f)
+
+            scaler_data = scaler.transform(data)
+            pred = model.predict(scaler_data)
+
+            response = {
+                'Prediction' : pred[0],
+                'model-accuracy' : Concrete_Scores.get(model_code)
+            }
+
+            return response
+    except Exception as e:
+        print(f'Concrete predictor error: {e}')
+        raise RuntimeError(f'Failed to load model/scaler or perform prediction: {e}') from e

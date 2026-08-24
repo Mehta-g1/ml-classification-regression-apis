@@ -342,3 +342,88 @@ def California_Housing(request):
                 'prediction': 'null'
             }
         }, status=500)
+
+
+@csrf_exempt
+@require_http_methods(['POST'])
+def Concrete(request):
+    data = get_request_data(request)
+    if data is None:
+        return JsonResponse({
+            'status': 'Bad Request',
+            'message': 'Invalid JSON format in request body.',
+            'output': {
+                'model_id': None,
+                'prediction': 'null'
+            }
+        }, status=400)
+
+    model_name_raw = data.get('model-name')
+    if model_name_raw is None or str(model_name_raw).strip() == "":
+        return JsonResponse({
+            'status': 'Bad Request',
+            'message': "Missing required field: 'model-name'.",
+            'output': {
+                'model_id': None,
+                'prediction': 'null'
+            }
+        }, status=400)
+
+    model_name = str(model_name_raw).strip()
+    model_code = REGRESSOR_PREDICTOR_MODEL_CODE.get(model_name)
+    if not model_code:
+        return JsonResponse({
+            'status': 'Bad Request',
+            'message': f"Wrong Model Name: '{model_name}'. Available options: {list(REGRESSOR_PREDICTOR_MODEL_CODE.keys())}",
+            'model-name': model_name,
+            'output': {
+                'model_id': None,
+                'prediction': 'null'
+            }
+        }, status=400)
+
+    required_features = ['cement', 'slag', 'fly_ash', 'water', 'superplasticizer', 'coarse_aggregate', 'fine_aggregate', 'age']
+    
+    cleaned_features, errors = validate_numeric_fields(data, required_features)
+
+    if errors:
+        return JsonResponse({
+            'status': 'Unprocessable Entity',
+            'message': 'Input validation failed. Please check the errors field for details.',
+            'errors': errors,
+            'model-name': model_name,
+            'output': {
+                'model_id': model_code,
+                'prediction': 'null'
+            }
+        }, status=422)
+
+    try:
+        df = pd.DataFrame([cleaned_features])[required_features]
+        response = Concrete_predictor(request, df, model_code)
+
+        if response is None or 'Prediction' not in response:
+            raise ValueError("Predictor returned an empty or invalid prediction payload")
+        
+        response['Prediction'] = float(response['Prediction'])
+
+        return JsonResponse({
+            'status': 'Ok',
+            'message': 'Success',
+            'model-name': model_name,
+            'output': response
+        }, status=200)
+
+        
+    except Exception as e:
+        return JsonResponse({
+            'status': 'Internal Server Error',
+            'message': f'Prediction engine failure: {str(e)}',
+            'model-name': model_name,
+            'output': {
+                'model_id': model_code,
+                'prediction': 'null'
+            }
+        }, status=500)
+
+
