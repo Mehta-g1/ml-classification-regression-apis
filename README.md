@@ -1,6 +1,6 @@
 # Django Machine Learning API Project
 
-A production-ready Django web application providing REST APIs to run predictions for three different datasets (Classification and Regression) using pre-trained Machine Learning models. The application supports a unified input interface, accepting both **JSON payloads** (`application/json`) and **Form-Data** / **URL-Encoded** payloads, backed by fast-fail input validation.
+A Django web application providing REST APIs to run predictions for three different datasets (Classification and Regression) using pre-trained Machine Learning models. The application supports a unified input interface, accepting both **JSON payloads** (`application/json`) and **Form-Data** / **URL-Encoded** payloads, backed by fast-fail input validation.
 
 ---
 
@@ -57,12 +57,14 @@ ML Project/
 ## Machine Learning Models Supported
 
 ### Classification (Heart Disease, Diabetes)
+
 1. **Logistic Regression** (Name: `LogisticRegression`)
 2. **K-Neighbors Classifier (kNN)** (Name: `KNeighborsClassifier`)
 3. **Decision Tree Classifier** (Name: `DecisionTreeClassifier`)
 4. **Support Vector Classifier (SVC)** (Name: `SVC`)
 
 ### Regression (California Housing)
+
 1. **Linear Regression** (Name: `LinearRegression`)
 2. **Ridge Regression** (Name: `Ridge`)
 3. **K-Neighbors Regressor** (Name: `KNeighborsRegressor`)
@@ -74,6 +76,7 @@ ML Project/
 ## Request Formats & Payload Flexibility
 
 All endpoints support two request payload types:
+
 1. **JSON Payload** (`Content-Type: application/json`):
    ```json
    {
@@ -93,6 +96,7 @@ All endpoints support two request payload types:
 ## API Endpoints & Dataset Examples
 
 ### 1. Predict Diabetes
+
 * **URL:** `/predict/diabetes/`
 * **Method:** `POST`
 * **Validation Rules:**
@@ -134,6 +138,7 @@ All endpoints support two request payload types:
 ---
 
 ### 2. Predict Heart Disease
+
 * **URL:** `/predict/heart/`
 * **Method:** `POST`
 * **Dataset Example (From `heart.ipynb` Index 941):**
@@ -175,6 +180,7 @@ All endpoints support two request payload types:
 ---
 
 ### 3. Predict California Housing Prices
+
 * **URL:** `/predict/california-housing/`
 * **Method:** `POST`
 * **Dataset Example (From `california_housing.ipynb` Index 0):**
@@ -213,7 +219,9 @@ All endpoints support two request payload types:
 ## Standard Error Response Structures
 
 ### 1. HTTP 400 Bad Request
+
 Occurs if the `model-name` parameter is missing or has an unsupported value.
+
 * **Response Content:**
   ```json
   {
@@ -228,7 +236,9 @@ Occurs if the `model-name` parameter is missing or has an unsupported value.
   ```
 
 ### 2. HTTP 422 Unprocessable Entity
+
 Occurs if required fields are missing or cannot be parsed into numeric values.
+
 * **Response Content:**
   ```json
   {
@@ -247,14 +257,18 @@ Occurs if required fields are missing or cannot be parsed into numeric values.
   ```
 
 ### 3. HTTP 405 Method Not Allowed
+
 Occurs if a method other than `POST` (e.g. `GET`) is sent to the endpoint.
+
 * **Response Content:**
   ```html
   <h1>Method Not Allowed (GET)</h1>
   ```
 
 ### 4. HTTP 500 Internal Server Error
+
 Occurs if the prediction engine encounters a system error (e.g. missing serialized model binaries or scaling pipeline failures).
+
 * **Response Content:**
   ```json
   {
@@ -273,6 +287,7 @@ Occurs if the prediction engine encounters a system error (e.g. missing serializ
 ## Setup & Run Instructions
 
 ### 1. Set Up Virtual Environment & Dependencies
+
 ```bash
 # Create and activate virtual environment
 python -m venv .venv
@@ -283,12 +298,15 @@ pip install -r requirements.txt
 ```
 
 ### 2. Run Database Migrations
+
 ```bash
 python manage.py migrate
 ```
 
 ### 3. Start the Django Server
+
 ```bash
 python manage.py runserver
 ```
+
 The application will run locally at `http://127.0.0.1:8000/`.
