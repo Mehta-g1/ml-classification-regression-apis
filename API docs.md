@@ -1,6 +1,6 @@
 # Developer API Guide
 
-Hey! Here is a quick, human-friendly guide to querying our ML prediction APIs.
+Hey! Here is a quick, guide to querying our ML prediction APIs.
 
 ---
 
@@ -15,6 +15,7 @@ Hey! Here is a quick, human-friendly guide to querying our ML prediction APIs.
 ## 2. API Endpoints
 
 ### 1. Concrete Compressive Strength
+
 * **URL:** `/predict/concrete/`
 * **Models:** `LinearRegression`, `Ridge`, `KNeighborsRegressor`, `DecisionTreeRegressor`, `SVR`
 * **Features:** `cement`, `slag`, `fly_ash`, `water`, `superplasticizer`, `coarse_aggregate`, `fine_aggregate`, `age` (all floats).
@@ -35,6 +36,7 @@ Hey! Here is a quick, human-friendly guide to querying our ML prediction APIs.
 * **Response Output:** Returns the predicted strength in Megapascals (`Prediction`) and the model metrics.
 
 ### 2. California Housing Prices
+
 * **URL:** `/predict/california-housing/`
 * **Models:** `LinearRegression`, `Ridge`, `KNeighborsRegressor`, `DecisionTreeRegressor`, `SVR`
 * **Features:** `MedInc`, `HouseAge`, `AveRooms`, `AveBedrms`, `Population`, `AveOccup`, `Latitude`, `Longitude` (all floats).
@@ -55,6 +57,7 @@ Hey! Here is a quick, human-friendly guide to querying our ML prediction APIs.
 * **Response Output:** Returns the median block value in hundreds of thousands of USD (`Prediction`).
 
 ### 3. Diabetes Risk Classification
+
 * **URL:** `/predict/diabetes/`
 * **Models:** `LogisticRegression`, `KNeighborsClassifier`, `DecisionTreeClassifier`, `SVC`
 * **Features:** `age`, `bmi`, `glucose_fasting`, `hba1c`, `physical_activity_minutes_per_week`, `cardiovascular_history` (floats); `family_history_diabetes`, `hypertension_history` (`"1"` or `"0"`); `gender` (`"Male"`, `"Female"`, `"Other"`); `smoking_status` (`"Never"`, `"Former"`, `"Current"`).
@@ -77,6 +80,7 @@ Hey! Here is a quick, human-friendly guide to querying our ML prediction APIs.
 * **Response Output:** Returns risk classification (`Prediction`: `1` for risk, `0` otherwise).
 
 ### 4. Heart Disease Classification
+
 * **URL:** `/predict/heart/`
 * **Models:** `LogisticRegression`, `KNeighborsClassifier`, `DecisionTreeClassifier`, `SVC`
 * **Features:** `age`, `sex` (`1`=M, `0`=F), `cp` (chest pain `0`-`3`), `trestbps`, `chol`, `fbs` (`1` or `0`), `restecg`, `thalach`, `exang`, `oldpeak`, `slope`, `ca`, `thal` (all floats).
@@ -106,6 +110,7 @@ Hey! Here is a quick, human-friendly guide to querying our ML prediction APIs.
 ## 3. Sample Response Format (200 OK)
 
 All APIs return a standard success response containing the prediction result and model accuracy metrics:
+
 ```json
 {
   "status": "Ok",
@@ -129,6 +134,7 @@ All APIs return a standard success response containing the prediction result and
 When something goes wrong, the API outputs a clean JSON response rather than letting the server crash:
 
 * **`400 Bad Request`**
+
   * **Invalid JSON:** Your JSON payload is broken (missing commas, quotes, etc.).
   * **Missing / Wrong Model Name:** Ensure `"model-name"` is provided and is one of the supported models.
   * **Sample Response:**
@@ -142,8 +148,8 @@ When something goes wrong, the API outputs a clean JSON response rather than let
       }
     }
     ```
-
 * **`422 Unprocessable Content`**
+
   * **Missing parameters or non-numeric types:** You missed a field or passed text where a number belongs.
   * **Sample Response:**
     ```json
@@ -160,6 +166,6 @@ When something goes wrong, the API outputs a clean JSON response rather than let
       }
     }
     ```
-
 * **`500 Internal Server Error`**
+
   * **System Error:** The server couldn't load the model file. Check Django terminal logs for the traceback.
