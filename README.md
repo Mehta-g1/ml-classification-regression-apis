@@ -23,6 +23,7 @@ ML Project/
 │   │   ├── Diabetes/           # diabetes_dataset.csv
 │   │   └── Heart Disease/      # heart.csv
 │   └── Regression datasets/
+│       ├── Automobile/         # auto_price.csv
 │       ├── California Housing/ # california_housing.csv
 │       └── Concrete Data/      # Concrete_Data.xls
 │
@@ -39,16 +40,17 @@ ML Project/
 │   │   ├── California_Housing/ # Pickled regressors (Linear Regression, Ridge, kNN, Tree, SVR)
 │   │   └── Concrete/           # Pickled regressors (Linear Regression, Ridge, kNN, Tree, SVR)
 │   └── Scalers/                # Scikit-learn StandardScaler/preprocessing pipelines
-│       ├── diabetes_scaler.pkl
-│       ├── heart_scaler.pkl
-│       ├── california_housing.pkl
-│       └── concrete_scaler.pkl
+│   │   ├── diabetes_scaler.pkl
+│   │   ├── heart_scaler.pkl
+│   │   ├── california_housing.pkl
+│   │   └── concrete_scaler.pkl
 │
 ├── Notebooks/                  # Research, modeling, and training notebooks
 │   ├── Classification/
 │   │   ├── diabetes.ipynb      # Training & evaluation of classification models for Diabetes
 │   │   └── heart.ipynb         # Training & evaluation of classification models for Heart Disease
 │   └── Regression/
+│       ├── auto_price.ipynb    # Model training and exploratory analysis for auto pricing
 │       ├── california_housing.ipynb # Training & evaluation of regression models for housing price index
 │       └── concrete.ipynb      # Training & evaluation of regression models for concrete strength
 │
