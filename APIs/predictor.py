@@ -288,3 +288,73 @@ def Concrete_predictor(request, data:pd.DataFrame, model_code:int):
     except Exception as e:
         print(f'Concrete predictor error: {e}')
         raise RuntimeError(f'Failed to load model/scaler or perform prediction: {e}') from e
+
+
+
+
+def Auto_Price_Predictor(request, data:pd.DataFrame, model_code:int):
+    Auto_Scores = {
+    1 : {
+        'r2_score' : 0.7991698250994186,
+        'mean_absolute_error' : 2815.4906790660093,
+        'mean_squared_error' : 15659145.596779807
+    },
+    2 : {
+        'r2_score' : 0.7754441553546209,
+        'mean_absolute_error' : 2994.3329040058993,
+        'mean_squared_error' : 17509085.31375123
+    },
+    3 : {
+        'r2_score' : 0.7593903829798968,
+        'mean_absolute_error' : 2319.0700251326366,
+        'mean_squared_error' : 18760831.268350992
+    },
+    4 : {
+        'r2_score' : 0.9246250913272545,
+        'mean_absolute_error' : 1712.8520810581238,
+        'mean_squared_error' : 5877138.083631109
+    },
+    5 : {
+        'r2_score' : 0.7588731189264806,
+        'mean_absolute_error' : 2984.947642911973,
+        'mean_squared_error' : 18801163.420272052
+    }
+}
+
+    Auto_Model_Paths = {
+        1: Path.cwd()/'Ml_models and scalers'/'ML_Models'/'Auto Price'/ 'linear_model.pkl',
+        2: Path.cwd()/'Ml_models and scalers'/'ML_Models'/'Auto Price'/ 'ridge_model.pkl',
+        3: Path.cwd()/'Ml_models and scalers'/'ML_Models'/'Auto Price'/ 'kNN_model.pkl',
+        4: Path.cwd()/'Ml_models and scalers'/'ML_Models'/'Auto Price'/ 'tree_model.pkl',
+        5: Path.cwd()/'Ml_models and scalers'/'ML_Models'/'Auto Price'/ 'svr_model.pkl'
+    }
+
+    scaler_path = Path.cwd()/ "Ml_models and scalers" / "Scalers" / "auto_scaler.pkl"
+
+    model = ''
+    scaler = ''
+
+    model_path = Auto_Model_Paths.get(model_code)
+    if not model_path:
+        raise ValueError(f"Invalid model code: {model_code}")
+
+    try:
+        with open(scaler_path, 'rb') as f:
+            scaler = pickle.load(f)
+        
+        with open(model_path, 'rb') as f:
+            model = pickle.load(f)
+
+            scaler_data = scaler.transform(data)
+            pred = model.predict(scaler_data)
+
+            response = {
+                'Prediction' : pred[0],
+                'model-accuracy' : Auto_Scores.get(model_code)
+            }
+
+            return response
+    except Exception as e:
+        print(f'Auto Predictor Error: {e}')
+        raise RuntimeError(f'Failed to load model/scaler or perform prediction: {e}') from e
+
