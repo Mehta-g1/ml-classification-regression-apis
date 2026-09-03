@@ -10,147 +10,203 @@ import pandas as pd
 
 
 CLASSIFIER_PREDICTOR_MODEL_CODE = {
-    'LogisticRegression':1,
-    'KNeighborsClassifier':2,
-    'DecisionTreeClassifier':3,
-    'SVC':4
+    'LogisticRegression': 1,
+    'KNeighborsClassifier': 2,
+    'DecisionTreeClassifier': 3,
+    'SVC': 4
 }
 
+CLASSIFIER_CODE_TO_NAME = {v: k for k, v in CLASSIFIER_PREDICTOR_MODEL_CODE.items()}
+
 REGRESSOR_PREDICTOR_MODEL_CODE = {
-    'LinearRegression':1,
-    'Ridge':2,
-    'KNeighborsRegressor':3,
-    'DecisionTreeRegressor':4,
-    'SVR':5
+    'LinearRegression': 1,
+    'Ridge': 2,
+    'KNeighborsRegressor': 3,
+    'DecisionTreeRegressor': 4,
+    'SVR': 5
 }
+
+REGRESSOR_CODE_TO_NAME = {v: k for k, v in REGRESSOR_PREDICTOR_MODEL_CODE.items()}
+
+HEART_MODEL_SCORES = {
+    1: {'accuracy_score': 0.7763, 'recall_score': 0.8889, 'f1_score': 0.7901},
+    2: {'accuracy_score': 0.7895, 'recall_score': 0.9444, 'f1_score': 0.8095},
+    3: {'accuracy_score': 0.7763, 'recall_score': 0.8889, 'f1_score': 0.7901},
+    4: {'accuracy_score': 0.7500, 'recall_score': 0.8333, 'f1_score': 0.7595}
+}
+
+DIABETES_MODEL_SCORES = {
+    1: {'accuracy_score': 0.8847, 'recall_score': 0.8176, 'f1_score': 0.8946},
+    2: {'accuracy_score': 0.8743, 'recall_score': 0.8622, 'f1_score': 0.8914},
+    3: {'accuracy_score': 0.9204, 'recall_score': 0.8670, 'f1_score': 0.9288},
+    4: {'accuracy_score': 0.8996, 'recall_score': 0.8714, 'f1_score': 0.9122}
+}
+
+CALIFORNIA_HOUSING_SCORES = {
+    1: {'r2_score': 0.6010, 'mean_absolute_error': 0.5367, 'mean_squared_error': 0.5445},
+    2: {'r2_score': 0.5972, 'mean_absolute_error': 0.5387, 'mean_squared_error': 0.5496},
+    3: {'r2_score': 0.7414, 'mean_absolute_error': 0.3961, 'mean_squared_error': 0.3529},
+    4: {'r2_score': 0.7277, 'mean_absolute_error': 0.4011, 'mean_squared_error': 0.3715},
+    5: {'r2_score': 0.7416, 'mean_absolute_error': 0.3924, 'mean_squared_error': 0.3526}
+}
+
+CONCRETE_SCORES = {
+    1: {'r2_score': 0.6129, 'mean_absolute_error': 8.1866, 'mean_squared_error': 104.9283},
+    2: {'r2_score': 0.6133, 'mean_absolute_error': 8.1868, 'mean_squared_error': 104.8045},
+    3: {'r2_score': 0.8030, 'mean_absolute_error': 5.4923, 'mean_squared_error': 53.3949},
+    4: {'r2_score': 0.8798, 'mean_absolute_error': 3.7901, 'mean_squared_error': 32.5838},
+    5: {'r2_score': 0.8867, 'mean_absolute_error': 3.9354, 'mean_squared_error': 30.7083}
+}
+
+AUTO_SCORES = {
+    1: {'r2_score': 0.7992, 'mean_absolute_error': 2815.49, 'mean_squared_error': 15659145.60},
+    2: {'r2_score': 0.7754, 'mean_absolute_error': 2994.33, 'mean_squared_error': 17509085.31},
+    3: {'r2_score': 0.7594, 'mean_absolute_error': 2319.07, 'mean_squared_error': 18760831.27},
+    4: {'r2_score': 0.9246, 'mean_absolute_error': 1712.85, 'mean_squared_error': 5877138.08},
+    5: {'r2_score': 0.7589, 'mean_absolute_error': 2984.95, 'mean_squared_error': 18801163.42}
+}
+
+def get_all_dataset_accuracies(dataset_filter: str = None):
+    """Returns structured accuracy metrics for models across datasets."""
+    datasets_meta = {
+        'heart': {
+            'dataset_id': 'heart',
+            'name': 'Heart Disease Risk',
+            'type': 'classification',
+            'target': 'Heart Disease Risk (1: Risk Present, 0: Normal)',
+            'models': [
+                {
+                    'model_name': CLASSIFIER_CODE_TO_NAME[code],
+                    'model_code': code,
+                    'metrics': HEART_MODEL_SCORES[code]
+                }
+                for code in sorted(HEART_MODEL_SCORES.keys())
+            ]
+        },
+        'diabetes': {
+            'dataset_id': 'diabetes',
+            'name': 'Diabetes Risk Prediction',
+            'type': 'classification',
+            'target': 'Diabetes Risk (1: Positive, 0: Negative)',
+            'models': [
+                {
+                    'model_name': CLASSIFIER_CODE_TO_NAME[code],
+                    'model_code': code,
+                    'metrics': DIABETES_MODEL_SCORES[code]
+                }
+                for code in sorted(DIABETES_MODEL_SCORES.keys())
+            ]
+        },
+        'california-housing': {
+            'dataset_id': 'california-housing',
+            'name': 'California Housing Prices',
+            'type': 'regression',
+            'target': 'Median House Value ($100k units)',
+            'models': [
+                {
+                    'model_name': REGRESSOR_CODE_TO_NAME[code],
+                    'model_code': code,
+                    'metrics': CALIFORNIA_HOUSING_SCORES[code]
+                }
+                for code in sorted(CALIFORNIA_HOUSING_SCORES.keys())
+            ]
+        },
+        'concrete': {
+            'dataset_id': 'concrete',
+            'name': 'Concrete Compressive Strength',
+            'type': 'regression',
+            'target': 'Compressive Strength (MPa)',
+            'models': [
+                {
+                    'model_name': REGRESSOR_CODE_TO_NAME[code],
+                    'model_code': code,
+                    'metrics': CONCRETE_SCORES[code]
+                }
+                for code in sorted(CONCRETE_SCORES.keys())
+            ]
+        },
+        'auto-price': {
+            'dataset_id': 'auto-price',
+            'name': 'Automobile Price Prediction',
+            'type': 'regression',
+            'target': 'Vehicle Price (USD)',
+            'models': [
+                {
+                    'model_name': REGRESSOR_CODE_TO_NAME[code],
+                    'model_code': code,
+                    'metrics': AUTO_SCORES[code]
+                }
+                for code in sorted(AUTO_SCORES.keys())
+            ]
+        }
+    }
+    if dataset_filter and dataset_filter in datasets_meta:
+        return datasets_meta[dataset_filter]
+    return datasets_meta
 
 
 def Heart_predictor(request, data: pd.DataFrame, model_code: int):
-
     Heart_models_file_paths = {
-        1: Path.cwd()/'Ml_models and scalers'/'ML_Models'/'Heart'/ 'Logistic_model.pkl',
-        2: Path.cwd()/'Ml_models and scalers'/'ML_Models'/'Heart'/ 'kNN_model.pkl',
-        3: Path.cwd()/'Ml_models and scalers'/'ML_Models'/'Heart'/ 'tree_model.pkl',
-        4: Path.cwd()/'Ml_models and scalers'/'ML_Models'/'Heart'/ 'svc_model.pkl'
+        1: Path.cwd() / 'ML_models and scalers' / 'ML_Models' / 'Heart' / 'Logistic_model.pkl',
+        2: Path.cwd() / 'ML_models and scalers' / 'ML_Models' / 'Heart' / 'kNN_model.pkl',
+        3: Path.cwd() / 'ML_models and scalers' / 'ML_Models' / 'Heart' / 'tree_model.pkl',
+        4: Path.cwd() / 'ML_models and scalers' / 'ML_Models' / 'Heart' / 'svc_model.pkl'
     }
 
-    Heart_Model_Scores = {
-        1 : {
-            'accuracy_score':0.7763157894736842,
-            'recall_score': 0.8888888888888888,
-            'f1_score': 0.7901234567901234,
-        },
-        2 : {
-            'accuracy_score':0.7894736842105263,
-            'recall_score': 0.9444444444444444,
-            'f1_score': 0.8095238095238095,
-        },
-        3: {
-            'accuracy_score':0.7763157894736842,
-            'recall_score': 0.8888888888888888,
-            'f1_score': 0.7901234567901234,
-        },
-        4 : {
-            'accuracy_score' : 0.75,
-            'recall_score': 0.8333333333333334,
-            'f1_score': 0.759493670886076,
-        }
-    }
-
-    scaler_path = Path.cwd()/'Ml_models and scalers'/'Scalers'/'heart_scaler.pkl'
-    model = ''
-    scaler = ''
-    # Retrieve the model file path based on the model code mapping
+    scaler_path = Path.cwd() / 'ML_models and scalers' / 'Scalers' / 'heart_scaler.pkl'
     model_path = Heart_models_file_paths.get(model_code)
     if not model_path:
         raise ValueError(f"Invalid model code: {model_code}")
 
-    try: 
-        # 1. Load the fitted scaler object
+    try:
         with open(scaler_path, 'rb') as f:
             scaler = pickle.load(f)
-        
-        # 2. Load the trained machine learning model
+
         with open(model_path, 'rb') as f:
             model = pickle.load(f)
-            
-            # 3. Transform input data using the loaded scaler and perform prediction
+
             scaled_data = scaler.transform(data)
             pred = model.predict(scaled_data)
 
-            # 4. Return both the prediction and the performance scores of the selected model
             response = {
-                'Prediction': pred[0],
-                'model-accuracy': Heart_Model_Scores.get(model_code)
+                'Prediction': int(pred[0]),
+                'model-accuracy': HEART_MODEL_SCORES.get(model_code)
             }
             return response
     except Exception as e:
-        # Print error details to terminal for developer tracking and re-raise
         print(f"Heart predictor error: {e}")
         raise RuntimeError(f"Failed to load model/scaler or perform prediction: {e}") from e
 
 
-
-def Diabetes_predictor(request, data:pd.DataFrame, model_code:int):
-    Diabetes_model_scores = {
-        1 : {
-            'sccuracy_score' : 0.8847,
-            'f1_score' : 0.8946069469835466,
-            'recall_score' : 0.8175591011611394,
-        },
-        2 : {
-            'accuracy_score':0.87425,
-            'recall_score': 0.8621669033497619,
-            'f1_score': 0.8913935311137021,
-        },
-        3: {
-            'sccuracy_score' : 0.9204,
-            'f1_score' : 0.9287695749440716,
-            'recall_score' : 0.867011945535043,
-        },
-        4 : {
-            'accuracy_score':0.8996,
-            'recall_score': 0.8714393116698689,
-            'f1_score': 0.9122070654074851,
-        }
-    }
-
+def Diabetes_predictor(request, data: pd.DataFrame, model_code: int):
     Diabetes_models_file_paths = {
-        1: Path.cwd()/'Ml_models and scalers'/'ML_Models'/'Diabetes'/ 'Logistic_model.pkl',
-        2: Path.cwd()/'Ml_models and scalers'/'ML_Models'/'Diabetes'/ 'kNN_model.pkl',
-        3: Path.cwd()/'Ml_models and scalers'/'ML_Models'/'Diabetes'/ 'tree_model.pkl',
-        4: Path.cwd()/'Ml_models and scalers'/'ML_Models'/'Diabetes'/ 'svc_model.pkl'
+        1: Path.cwd() / 'ML_models and scalers' / 'ML_Models' / 'Diabetes' / 'Logistic_model.pkl',
+        2: Path.cwd() / 'ML_models and scalers' / 'ML_Models' / 'Diabetes' / 'kNN_model.pkl',
+        3: Path.cwd() / 'ML_models and scalers' / 'ML_Models' / 'Diabetes' / 'tree_model.pkl',
+        4: Path.cwd() / 'ML_models and scalers' / 'ML_Models' / 'Diabetes' / 'svc_model.pkl'
     }
 
-    scaler_path = Path.cwd()/'Ml_models and scalers'/'Scalers'/'diabetes_scaler.pkl'
-    model = ''
-    scaler = ''
-    # Retrieve the model file path based on the model code mapping
+    scaler_path = Path.cwd() / 'ML_models and scalers' / 'Scalers' / 'diabetes_scaler.pkl'
     model_path = Diabetes_models_file_paths.get(model_code)
     if not model_path:
         raise ValueError(f"Invalid model code: {model_code}")
 
-    try: 
-        # 1. Load the fitted scaler object
+    try:
         with open(scaler_path, 'rb') as f:
             scaler = pickle.load(f)
-        
-        # 2. Load the trained machine learning model
+
         with open(model_path, 'rb') as f:
             model = pickle.load(f)
-            
-            # 3. Transform input data using the loaded scaler and perform prediction
+
             scaled_data = scaler.transform(data)
             pred = model.predict(scaled_data)
 
-            # 4. Return both the prediction and the performance scores of the selected model
             response = {
-                'Prediction': pred[0],
-                'model-accuracy': Diabetes_model_scores.get(model_code)
+                'Prediction': int(pred[0]),
+                'model-accuracy': DIABETES_MODEL_SCORES.get(model_code)
             }
             return response
     except Exception as e:
-        # Print error details to terminal for developer tracking and re-raise
         print(f"Diabetes predictor error: {e}")
         raise RuntimeError(f"Failed to load model/scaler or perform prediction: {e}") from e
 

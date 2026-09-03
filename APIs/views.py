@@ -509,3 +509,38 @@ def Auto(request):
                 'prediction': 'null'
             }
         }, status=500)
+
+
+@csrf_exempt
+@require_http_methods(["GET"])
+def Accuracy_Scores(request):
+    """
+    Returns accuracy scores and model benchmarks.
+    Can be filtered with ?dataset=heart | diabetes | california-housing | concrete | auto-price
+    """
+    dataset_param = request.GET.get('dataset', '').strip().lower()
+    data = get_all_dataset_accuracies(dataset_param if dataset_param else None)
+    return JsonResponse({
+        'status': 'Ok',
+        'message': 'Accuracy metrics retrieved successfully',
+        'dataset': dataset_param or 'all',
+        'data': data
+    }, status=200)
+
+
+@csrf_exempt
+@require_http_methods(["GET"])
+def Dataset_Samples(request):
+    """
+    Returns test sample records for datasets.
+    Can be filtered with ?dataset=heart | diabetes | california-housing | concrete | auto-price
+    """
+    from .samples import get_dataset_samples
+    dataset_param = request.GET.get('dataset', '').strip().lower()
+    data = get_dataset_samples(dataset_param if dataset_param else None)
+    return JsonResponse({
+        'status': 'Ok',
+        'message': 'Sample test records retrieved successfully',
+        'dataset': dataset_param or 'all',
+        'data': data
+    }, status=200)
