@@ -1,6 +1,6 @@
 # Django Machine Learning API Project
 
-A production-ready Django web application providing REST APIs to run predictions for four different datasets (Classification and Regression) using pre-trained Machine Learning models. The application supports a unified input interface, accepting both **JSON payloads** (`application/json`) and **Form-Data** / **URL-Encoded** payloads, backed by fast-fail input validation.
+A production-ready Django web application providing REST APIs to run predictions for five different datasets (Classification and Regression) using pre-trained Machine Learning models. The application supports a unified input interface, accepting both **JSON payloads** (`application/json`) and **Form-Data** / **URL-Encoded** payloads, backed by fast-fail input validation.
 
 ---
 
@@ -35,15 +35,17 @@ ML Project/
 │
 ├── ML_models and scalers/      # Binary serialized model pipelines (.pkl format)
 │   ├── ML_Models/
-│   │   ├── Diabetes/           # Pickled classifiers (Logistic Regression, kNN, Decision Tree, SVC)
-│   │   ├── Heart/              # Pickled classifiers (Logistic Regression, kNN, Decision Tree, SVC)
+│   │   ├── Auto Price/         # Pickled regressors (Linear Regression, Ridge, kNN, Tree, SVR)
 │   │   ├── California_Housing/ # Pickled regressors (Linear Regression, Ridge, kNN, Tree, SVR)
-│   │   └── Concrete/           # Pickled regressors (Linear Regression, Ridge, kNN, Tree, SVR)
+│   │   ├── Concrete/           # Pickled regressors (Linear Regression, Ridge, kNN, Tree, SVR)
+│   │   ├── Diabetes/           # Pickled classifiers (Logistic Regression, kNN, Decision Tree, SVC)
+│   │   └── Heart/              # Pickled classifiers (Logistic Regression, kNN, Decision Tree, SVC)
 │   └── Scalers/                # Scikit-learn StandardScaler/preprocessing pipelines
-│   │   ├── diabetes_scaler.pkl
-│   │   ├── heart_scaler.pkl
-│   │   ├── california_housing.pkl
-│   │   └── concrete_scaler.pkl
+│       ├── auto_scaler.pkl
+│       ├── california_housing.pkl
+│       ├── concrete_scaler.pkl
+│       ├── diabetes_scaler.pkl
+│       └── heart_scaler.pkl
 │
 ├── Notebooks/                  # Research, modeling, and training notebooks
 │   ├── Classification/
@@ -68,7 +70,7 @@ ML Project/
 3. **Decision Tree Classifier** (Name: `DecisionTreeClassifier`)
 4. **Support Vector Classifier (SVC)** (Name: `SVC`)
 
-### Regression (California Housing, Concrete Strength)
+### Regression (California Housing, Concrete Strength, Automobile Price Prediction)
 1. **Linear Regression** (Name: `LinearRegression`)
 2. **Ridge Regression** (Name: `Ridge`)
 3. **K-Neighbors Regressor** (Name: `KNeighborsRegressor`)
@@ -83,8 +85,7 @@ All endpoints support two request payload types:
 1. **JSON Payload** (`Content-Type: application/json`):
    ```json
    {
-     "model-name": "LogisticRegression",
-     "age": 58,
+     "model-name": "LinearRegression",
      ...
    }
    ```
