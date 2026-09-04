@@ -443,7 +443,7 @@ def Auto(request):
             }
         }, status=400)
     model_name_raw = data.get('model-name')
-    if model_name_raw is None or str(model_name_raw).strip == "":
+    if model_name_raw is None or str(model_name_raw).strip() == "":
         return JsonResponse({
             'status': 'Bad Request',
             'message': "Missing required field: 'model-name'.",
