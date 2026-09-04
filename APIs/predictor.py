@@ -72,61 +72,81 @@ AUTO_PRICE_SCORES = {
 def get_all_dataset_accuracies(dataset_filter=None):
     datasets_meta = {
         'heart': {
+            'dataset_id': 'heart',
+            'name': 'Heart Disease Risk',
             'dataset_name': 'Heart Disease Classification',
+            'type': 'classification',
             'task_type': 'classification',
             'target': 'Heart Disease (0 = No Disease, 1 = Disease)',
+            'best_model': 'KNeighborsClassifier',
             'models': [
-                {'model_id': 1, 'model_name': 'LogisticRegression', 'metrics': HEART_MODEL_SCORES[1]},
-                {'model_id': 2, 'model_name': 'KNeighborsClassifier', 'metrics': HEART_MODEL_SCORES[2]},
-                {'model_id': 3, 'model_name': 'DecisionTreeClassifier', 'metrics': HEART_MODEL_SCORES[3]},
-                {'model_id': 4, 'model_name': 'SVC', 'metrics': HEART_MODEL_SCORES[4]}
+                {'model_id': 1, 'model_code': 1, 'model_name': 'LogisticRegression', 'metrics': HEART_MODEL_SCORES[1], 'is_best': False},
+                {'model_id': 2, 'model_code': 2, 'model_name': 'KNeighborsClassifier', 'metrics': HEART_MODEL_SCORES[2], 'is_best': True},
+                {'model_id': 3, 'model_code': 3, 'model_name': 'DecisionTreeClassifier', 'metrics': HEART_MODEL_SCORES[3], 'is_best': False},
+                {'model_id': 4, 'model_code': 4, 'model_name': 'SVC', 'metrics': HEART_MODEL_SCORES[4], 'is_best': False}
             ]
         },
         'diabetes': {
+            'dataset_id': 'diabetes',
+            'name': 'Diabetes Risk Prediction',
             'dataset_name': 'Diabetes Risk Classification',
+            'type': 'classification',
             'task_type': 'classification',
             'target': 'Diabetes Diagnosis (0 = Non-Diabetic, 1 = Diabetic)',
+            'best_model': 'DecisionTreeClassifier',
             'models': [
-                {'model_id': 1, 'model_name': 'LogisticRegression', 'metrics': DIABETES_MODEL_SCORES[1]},
-                {'model_id': 2, 'model_name': 'KNeighborsClassifier', 'metrics': DIABETES_MODEL_SCORES[2]},
-                {'model_id': 3, 'model_name': 'DecisionTreeClassifier', 'metrics': DIABETES_MODEL_SCORES[3]},
-                {'model_id': 4, 'model_name': 'SVC', 'metrics': DIABETES_MODEL_SCORES[4]}
+                {'model_id': 1, 'model_code': 1, 'model_name': 'LogisticRegression', 'metrics': DIABETES_MODEL_SCORES[1], 'is_best': False},
+                {'model_id': 2, 'model_code': 2, 'model_name': 'KNeighborsClassifier', 'metrics': DIABETES_MODEL_SCORES[2], 'is_best': False},
+                {'model_id': 3, 'model_code': 3, 'model_name': 'DecisionTreeClassifier', 'metrics': DIABETES_MODEL_SCORES[3], 'is_best': True},
+                {'model_id': 4, 'model_code': 4, 'model_name': 'SVC', 'metrics': DIABETES_MODEL_SCORES[4], 'is_best': False}
             ]
         },
         'california-housing': {
+            'dataset_id': 'california-housing',
+            'name': 'California Housing Prices',
             'dataset_name': 'California Housing Price Regression',
+            'type': 'regression',
             'task_type': 'regression',
             'target': 'Median House Value (in $100,000s)',
+            'best_model': 'SVR',
             'models': [
-                {'model_id': 1, 'model_name': 'LinearRegression', 'metrics': CALIFORNIA_HOUSING_SCORES[1]},
-                {'model_id': 2, 'model_name': 'Ridge', 'metrics': CALIFORNIA_HOUSING_SCORES[2]},
-                {'model_id': 3, 'model_name': 'KNeighborsRegressor', 'metrics': CALIFORNIA_HOUSING_SCORES[3]},
-                {'model_id': 4, 'model_name': 'DecisionTreeRegressor', 'metrics': CALIFORNIA_HOUSING_SCORES[4]},
-                {'model_id': 5, 'model_name': 'SVR', 'metrics': CALIFORNIA_HOUSING_SCORES[5]}
+                {'model_id': 1, 'model_code': 1, 'model_name': 'LinearRegression', 'metrics': CALIFORNIA_HOUSING_SCORES[1], 'is_best': False},
+                {'model_id': 2, 'model_code': 2, 'model_name': 'Ridge', 'metrics': CALIFORNIA_HOUSING_SCORES[2], 'is_best': False},
+                {'model_id': 3, 'model_code': 3, 'model_name': 'KNeighborsRegressor', 'metrics': CALIFORNIA_HOUSING_SCORES[3], 'is_best': False},
+                {'model_id': 4, 'model_code': 4, 'model_name': 'DecisionTreeRegressor', 'metrics': CALIFORNIA_HOUSING_SCORES[4], 'is_best': False},
+                {'model_id': 5, 'model_code': 5, 'model_name': 'SVR', 'metrics': CALIFORNIA_HOUSING_SCORES[5], 'is_best': True}
             ]
         },
         'concrete': {
+            'dataset_id': 'concrete',
+            'name': 'Concrete Compressive Strength',
             'dataset_name': 'Concrete Compressive Strength Regression',
+            'type': 'regression',
             'task_type': 'regression',
             'target': 'Compressive Strength (MPa)',
+            'best_model': 'SVR',
             'models': [
-                {'model_id': 1, 'model_name': 'LinearRegression', 'metrics': CONCRETE_SCORES[1]},
-                {'model_id': 2, 'model_name': 'Ridge', 'metrics': CONCRETE_SCORES[2]},
-                {'model_id': 3, 'model_name': 'KNeighborsRegressor', 'metrics': CONCRETE_SCORES[3]},
-                {'model_id': 4, 'model_name': 'DecisionTreeRegressor', 'metrics': CONCRETE_SCORES[4]},
-                {'model_id': 5, 'model_name': 'SVR', 'metrics': CONCRETE_SCORES[5]}
+                {'model_id': 1, 'model_code': 1, 'model_name': 'LinearRegression', 'metrics': CONCRETE_SCORES[1], 'is_best': False},
+                {'model_id': 2, 'model_code': 2, 'model_name': 'Ridge', 'metrics': CONCRETE_SCORES[2], 'is_best': False},
+                {'model_id': 3, 'model_code': 3, 'model_name': 'KNeighborsRegressor', 'metrics': CONCRETE_SCORES[3], 'is_best': False},
+                {'model_id': 4, 'model_code': 4, 'model_name': 'DecisionTreeRegressor', 'metrics': CONCRETE_SCORES[4], 'is_best': False},
+                {'model_id': 5, 'model_code': 5, 'model_name': 'SVR', 'metrics': CONCRETE_SCORES[5], 'is_best': True}
             ]
         },
         'auto-price': {
+            'dataset_id': 'auto-price',
+            'name': 'Automobile Price Prediction',
             'dataset_name': 'Automobile Price Regression',
+            'type': 'regression',
             'task_type': 'regression',
             'target': 'Vehicle Price (USD)',
+            'best_model': 'DecisionTreeRegressor',
             'models': [
-                {'model_id': 1, 'model_name': 'LinearRegression', 'metrics': AUTO_PRICE_SCORES[1]},
-                {'model_id': 2, 'model_name': 'Ridge', 'metrics': AUTO_PRICE_SCORES[2]},
-                {'model_id': 3, 'model_name': 'KNeighborsRegressor', 'metrics': AUTO_PRICE_SCORES[3]},
-                {'model_id': 4, 'model_name': 'DecisionTreeRegressor', 'metrics': AUTO_PRICE_SCORES[4]},
-                {'model_id': 5, 'model_name': 'SVR', 'metrics': AUTO_PRICE_SCORES[5]}
+                {'model_id': 1, 'model_code': 1, 'model_name': 'LinearRegression', 'metrics': AUTO_PRICE_SCORES[1], 'is_best': False},
+                {'model_id': 2, 'model_code': 2, 'model_name': 'Ridge', 'metrics': AUTO_PRICE_SCORES[2], 'is_best': False},
+                {'model_id': 3, 'model_code': 3, 'model_name': 'KNeighborsRegressor', 'metrics': AUTO_PRICE_SCORES[3], 'is_best': False},
+                {'model_id': 4, 'model_code': 4, 'model_name': 'DecisionTreeRegressor', 'metrics': AUTO_PRICE_SCORES[4], 'is_best': True},
+                {'model_id': 5, 'model_code': 5, 'model_name': 'SVR', 'metrics': AUTO_PRICE_SCORES[5], 'is_best': False}
             ]
         }
     }
@@ -201,7 +221,6 @@ def Diabetes_predictor(request, data: pd.DataFrame, model_code: int):
         raise RuntimeError(f"Failed to load model/scaler or perform prediction: {e}") from e
 
 
-
 def California_Housing_predictor(request, data:pd.DataFrame, model_code:int):
     California_Model_Paths = {
         1: MODELS_DIR / 'ML_Models' / 'California_Housing' / 'linear_model.pkl',
@@ -271,8 +290,6 @@ def Concrete_predictor(request, data:pd.DataFrame, model_code:int):
     except Exception as e:
         print(f'Concrete predictor error: {e}')
         raise RuntimeError(f'Failed to load model/scaler or perform prediction: {e}') from e
-
-
 
 
 def Auto_Price_Predictor(request, data:pd.DataFrame, model_code:int):
