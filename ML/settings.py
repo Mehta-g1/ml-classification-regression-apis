@@ -7,11 +7,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 
 
-SECRET_KEY = 'django-insecure-^h3-t7%gn+mg@14r3@_*k!_3&9%i*dz=-7mvf4zibdo7ig*&d='
 SECRET_KEY = os.environ.get("SECRET_KEY")
 
-
-DEBUG = True
 
 DEBUG = os.environ.get("DEBUG", "False") == "True"
 ALLOWED_HOSTS = ['*']
@@ -26,7 +23,6 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    "corsheaders",
     "APIs"
 ]
 
