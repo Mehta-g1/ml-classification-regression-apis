@@ -1,134 +1,140 @@
 # Django Machine Learning API Project
 
-A production-ready Django web application providing REST APIs to run predictions for five different datasets (Classification and Regression) using pre-trained Machine Learning models. The application supports a unified input interface, accepting both **JSON payloads** (`application/json`) and **Form-Data** / **URL-Encoded** payloads, backed by fast-fail input validation.
+A production-ready Django web application providing RESTful APIs to run real-time inference across 5 distinct Machine Learning datasets (Classification & Regression). The service includes automated preprocessing pipelines, model performance benchmarks, realistic test sample datasets, fast-fail input validations, and built-in CORS support for modern frontend integration.
 
 ---
 
-## Project Structure & Files
-
-Here is the complete project directory structure with explanations of the primary components:
+## Project Structure & Architecture
 
 ```text
 ML Project/
 │
-├── APIs/                       # Django application package for API views & logic
-│   ├── predictor.py            # Contains ML prediction wrappers that load pickled scalers and models
-│   ├── views.py                # Endpoint request handlers; parses formats, validates fields, catches errors
-│   ├── urls.py                 # App-level routing mapping endpoints to views
-│   ├── apps.py                 # App configuration registry
-│   └── models.py               # Django DB models (unused, stateless architecture)
+├── APIs/                       # Core Django application for ML inference & utilities
+│   ├── predictor.py            # Model loading, scaler pipeline execution, and performance scores
+│   ├── samples.py              # Authentic test sample dataset extraction with safe fallbacks
+│   ├── middleware.py           # Custom CORS middleware with OPTIONS preflight handling
+│   ├── views.py                # Prediction and query endpoints with dual-payload parsing
+│   ├── urls.py                 # Endpoint URL routes (/predict/*)
+│   ├── apps.py                 # Django app configuration
+│   └── models.py               # Stateless architecture (database models unused)
 │
-├── Datasets/                   # Raw training data sourced from Notebook training
+├── Datasets/                   # Training & sample datasets
 │   ├── Classification datasets/
 │   │   ├── Diabetes/           # diabetes_dataset.csv
 │   │   └── Heart Disease/      # heart.csv
 │   └── Regression datasets/
 │       ├── Automobile/         # auto_price.csv
 │       ├── California Housing/ # california_housing.csv
-│       └── Concrete Data/      # Concrete_Data.xls
+│       └── Concrete Data/      # Concrete_Data.xls, concrete_data.csv
 │
-├── ML/                         # Project settings package
-│   ├── settings.py             # Global Django configurations, middleware, and installed apps
-│   ├── urls.py                 # Root URL router (routes /predict/* to APIs.urls)
-│   ├── wsgi.py / asgi.py       # WSGI/ASGI gateways for deployment servers
+├── ML/                         # Django project configuration
+│   ├── settings.py             # Environment configuration, middleware, CORS, Whitenoise
+│   ├── urls.py                 # Root URL router
+│   ├── wsgi.py / asgi.py       # WSGI/ASGI gateways for deployment (Gunicorn / Render)
 │   └── __init__.py
 │
-├── ML_models and scalers/      # Binary serialized model pipelines (.pkl format)
-│   ├── ML_Models/
-│   │   ├── Auto Price/         # Pickled regressors (Linear Regression, Ridge, kNN, Tree, SVR)
-│   │   ├── California_Housing/ # Pickled regressors (Linear Regression, Ridge, kNN, Tree, SVR)
-│   │   ├── Concrete/           # Pickled regressors (Linear Regression, Ridge, kNN, Tree, SVR)
-│   │   ├── Diabetes/           # Pickled classifiers (Logistic Regression, kNN, Decision Tree, SVC)
-│   │   └── Heart/              # Pickled classifiers (Logistic Regression, kNN, Decision Tree, SVC)
-│   └── Scalers/                # Scikit-learn StandardScaler/preprocessing pipelines
+├── ML_models and scalers/      # Binary serialized scikit-learn model pipelines (.pkl)
+│   ├── ML_Models/              # Trained models grouped by dataset
+│   │   ├── Auto Price/         # Linear Regression, Ridge, kNN, Decision Tree, SVR
+│   │   ├── California_Housing/ # Linear Regression, Ridge, kNN, Decision Tree, SVR
+│   │   ├── Concrete/           # Linear Regression, Ridge, kNN, Decision Tree, SVR
+│   │   ├── Diabetes/           # Logistic Regression, kNN, Decision Tree, SVC
+│   │   └── Heart/              # Logistic Regression, kNN, Decision Tree, SVC
+│   └── Scalers/                # Scikit-learn StandardScaler/preprocessors (.pkl)
 │       ├── auto_scaler.pkl
 │       ├── california_housing.pkl
 │       ├── concrete_scaler.pkl
 │       ├── diabetes_scaler.pkl
 │       └── heart_scaler.pkl
 │
-├── Notebooks/                  # Research, modeling, and training notebooks
-│   ├── Classification/
-│   │   ├── diabetes.ipynb      # Training & evaluation of classification models for Diabetes
-│   │   └── heart.ipynb         # Training & evaluation of classification models for Heart Disease
-│   └── Regression/
-│       ├── auto_price.ipynb    # Model training and exploratory analysis for auto pricing
-│       ├── california_housing.ipynb # Training & evaluation of regression models for housing price index
-│       └── concrete.ipynb      # Training & evaluation of regression models for concrete strength
+├── Notebooks/                  # Exploratory data analysis, training & evaluation notebooks
+│   ├── Classification/         # heart.ipynb, diabetes.ipynb
+│   └── Regression/             # auto_price.ipynb, california_housing.ipynb, concrete.ipynb
 │
+├── build.sh                    # Deployment build script for cloud hosting (Render)
 ├── manage.py                   # Django CLI administrative entry point
-└── requirements.txt            # System dependencies (Django, pandas, scikit-learn, etc.)
+└── requirements.txt            # Python dependencies (Django, scikit-learn, pandas, etc.)
 ```
 
 ---
 
-## Machine Learning Models Supported
+## Supported Machine Learning Models
 
-### Classification (Heart Disease, Diabetes)
-1. **Logistic Regression** (Name: `LogisticRegression`)
-2. **K-Neighbors Classifier (kNN)** (Name: `KNeighborsClassifier`)
-3. **Decision Tree Classifier** (Name: `DecisionTreeClassifier`)
-4. **Support Vector Classifier (SVC)** (Name: `SVC`)
+### Classification Tasks (Heart Disease, Diabetes Risk)
+| Model ID | Model Name | Description |
+| :--- | :--- | :--- |
+| `1` | `LogisticRegression` | Linear classification baseline |
+| `2` | `KNeighborsClassifier` | Non-parametric proximity-based classification |
+| `3` | `DecisionTreeClassifier` | Tree-structured rule-based classifier |
+| `4` | `SVC` | Support Vector Classifier with non-linear RBF kernel |
 
-### Regression (California Housing, Concrete Strength, Automobile Price Prediction)
-1. **Linear Regression** (Name: `LinearRegression`)
-2. **Ridge Regression** (Name: `Ridge`)
-3. **K-Neighbors Regressor** (Name: `KNeighborsRegressor`)
-4. **Decision Tree Regressor** (Name: `DecisionTreeRegressor`)
-5. **Support Vector Regressor (SVR)** (Name: `SVR`)
-
----
-
-## Request Formats & Payload Flexibility
-
-All endpoints support two request payload types:
-1. **JSON Payload** (`Content-Type: application/json`):
-   ```json
-   {
-     "model-name": "LinearRegression",
-     ...
-   }
-   ```
-2. **Form-Data / URL-Encoded** (`Content-Type: application/x-www-form-urlencoded` or `multipart/form-data`):
-   Key-value pairs sent in the POST request body.
-
-> [!NOTE]
-> All endpoints are restricted to the `POST` method. Any `GET` requests will automatically return `405 Method Not Allowed`.
+### Regression Tasks (California Housing, Concrete Strength, Auto Price)
+| Model ID | Model Name | Description |
+| :--- | :--- | :--- |
+| `1` | `LinearRegression` | Ordinary least squares regression baseline |
+| `2` | `Ridge` | L2-regularized linear regression |
+| `3` | `KNeighborsRegressor` | Distance-weighted continuous output regression |
+| `4` | `DecisionTreeRegressor` | Multi-split recursive regression tree |
+| `5` | `SVR` | Epsilon-Support Vector Regression |
 
 ---
 
-## API Documentation & Guides
+## API Capabilities
 
-For a comprehensive guide on sending requests, dataset columns description, parameters, input examples, error messages, and responses for each individual endpoint, please check the **[API Integration & Guidance Manual (API docs.md)](file:///e:/ML%20Project/API%20docs.md)**.
+1. **Prediction Endpoints (`POST`)**:
+   - `/predict/heart/` - Heart disease risk assessment
+   - `/predict/diabetes/` - Diabetes diagnosis prediction
+   - `/predict/california-housing/` - Median house value estimation
+   - `/predict/concrete/` - Concrete compressive strength prediction
+   - `/predict/auto-price/` - Automobile market price forecast
+
+2. **Benchmark & Accuracy Metrics (`GET`)**:
+   - `/predict/accuracy/` - Full benchmark metrics across all datasets and models (filtered via `?dataset=heart | diabetes | california-housing | concrete | auto-price`).
+
+3. **Authentic Test Samples (`GET`)**:
+   - `/predict/samples/` - Test sample records with actual ground-truth values (filtered via `?dataset=...`).
+
+4. **Payload Flexibility**:
+   - Accepts both **JSON** (`application/json`) and **Form-Data / URL-Encoded** bodies seamlessly.
+   - Built-in CORS preflight (`OPTIONS`) handling for modern single-page applications.
 
 ---
 
-## Setup & Run Instructions
+## API Documentation
+
+For the complete API manual with feature dictionaries, sample payloads, query parameters, status codes, and error responses, check **[API docs.md](file:///e:/ML%20Project/API%20docs.md)**.
+
+---
+
+## Setup & Local Run Instructions
 
 ### 1. Clone the Repository
 ```bash
-# Clone the project code
 git clone https://github.com/Mehta-g1/ml-classification-regression-apis.git
 cd ml-classification-regression-apis
 ```
 
 ### 2. Set Up Virtual Environment & Dependencies
 ```bash
-# Create and activate virtual environment
+# Create and activate virtual environment (Windows)
 python -m venv .venv
-.venv\Scripts\activate
+.\.venv\Scripts\activate
 
-# Install requirements
+# Install required dependencies
 pip install -r requirements.txt
 ```
 
-### 3. Run Database Migrations
-```bash
-python manage.py migrate
+### 3. Environment Variables (Optional)
+Create a `.env` file in the root directory:
+```env
+DEBUG=True
+SECRET_KEY=your-custom-django-secret-key
 ```
 
-### 4. Start the Django Server
+### 4. Run Migrations & Start Server
 ```bash
+python manage.py migrate
 python manage.py runserver
 ```
-The application will run locally at `http://127.0.0.1:8000/`.
+
+The Django API service will be accessible locally at `http://127.0.0.1:8000/`.

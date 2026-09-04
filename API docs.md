@@ -1,185 +1,366 @@
-# Developer API Guide
+# Developer API Reference Guide
 
-Hey! Here is a quick, human-friendly guide to querying our ML prediction APIs.
-
----
-
-## 1. Quick Integration Tips
-
-* **Flexible Formats:** We support both JSON (`application/json`) and Form-Data/URL-Encoded bodies. The server handles parsing automatically.
-* **POST Only:** All endpoints require `POST` requests. `GET` requests will fail with a `405 Method Not Allowed`.
-* **Trailing Slash:** You **must** append a `/` to the URLs (e.g. `/predict/auto-price/`) or Django's redirect might break your request.
+Welcome to the Machine Learning API documentation. This guide details how to query the prediction engines, fetch live model accuracy scores, load test samples, and handle server responses.
 
 ---
 
-## 2. API Endpoints
+## 1. Quick Integration Rules
 
-### 1. Automobile Price Prediction
-* **URL:** `/predict/auto-price/`
-* **Models:** `LinearRegression`, `Ridge`, `KNeighborsRegressor`, `DecisionTreeRegressor`, `SVR`
-* **Features:** `horsepower`, `curb-weight`, `engine-size`, `highway-mpg`, `city-mpg`, `wheel-base`, `length`, `width` (all floats).
-* **Sample Request (JSON):**
+* **Base URL:**
+  * Local Development: `http://127.0.0.1:8000`
+  * Production: `https://ml-apis-lqlt.onrender.com`
+* **Request Headers:**
+  * Predictions (`POST`): `Content-Type: application/json` or `application/x-www-form-urlencoded`
+  * Info & Samples (`GET`): `Accept: application/json`
+* **Trailing Slashes:** Always include trailing slashes on endpoints (e.g. `/predict/heart/`, `/predict/accuracy/`).
+* **CORS:** Built-in CORS middleware handles preflight `OPTIONS` requests automatically.
+
+---
+
+## 2. Model Accuracy & Benchmark Endpoint
+
+### `GET /predict/accuracy/`
+Fetches model performance metrics across all models and datasets.
+
+* **Query Parameters (Optional):**
+  * `?dataset=heart` | `diabetes` | `california-housing` | `concrete` | `auto-price`
+* **Sample Request:**
+  ```http
+  GET /predict/accuracy/?dataset=heart HTTP/1.1
+  Host: 127.0.0.1:8000
+  ```
+* **Sample Response (200 OK):**
   ```json
   {
-    "model-name": "LinearRegression",
-    "horsepower": 111.0,
-    "curb-weight": 2548.0,
-    "engine-size": 130.0,
-    "highway-mpg": 27.0,
-    "city-mpg": 21.0,
-    "wheel-base": 88.6,
-    "length": 168.8,
-    "width": 64.1
+    "status": "Ok",
+    "message": "Accuracy metrics retrieved successfully",
+    "dataset": "heart",
+    "data": {
+      "dataset_id": "heart",
+      "name": "Heart Disease Risk",
+      "dataset_name": "Heart Disease Classification",
+      "type": "classification",
+      "target": "Heart Disease (0 = No Disease, 1 = Disease)",
+      "best_model": "KNeighborsClassifier",
+      "models": [
+        {
+          "model_id": 1,
+          "model_code": 1,
+          "model_name": "LogisticRegression",
+          "metrics": {
+            "accuracy_score": 0.7763,
+            "recall_score": 0.8889,
+            "f1_score": 0.7901
+          },
+          "is_best": false
+        },
+        {
+          "model_id": 2,
+          "model_code": 2,
+          "model_name": "KNeighborsClassifier",
+          "metrics": {
+            "accuracy_score": 0.7895,
+            "recall_score": 0.9444,
+            "f1_score": 0.8095
+          },
+          "is_best": true
+        }
+      ]
+    }
   }
   ```
-* **Response Output:** Returns the estimated car price in USD (`Prediction`) and the model metrics.
 
-### 2. Concrete Compressive Strength
-* **URL:** `/predict/concrete/`
-* **Models:** `LinearRegression`, `Ridge`, `KNeighborsRegressor`, `DecisionTreeRegressor`, `SVR`
-* **Features:** `cement`, `slag`, `fly_ash`, `water`, `superplasticizer`, `coarse_aggregate`, `fine_aggregate`, `age` (all floats).
-* **Sample Request (JSON):**
+---
+
+## 3. Dataset Test Samples Endpoint
+
+### `GET /predict/samples/`
+Fetches verified test sample records directly from dataset files with ground-truth values for quick testing.
+
+* **Query Parameters (Optional):**
+  * `?dataset=heart` | `diabetes` | `california-housing` | `concrete` | `auto-price`
+* **Sample Request:**
+  ```http
+  GET /predict/samples/?dataset=concrete HTTP/1.1
+  Host: 127.0.0.1:8000
+  ```
+* **Sample Response (200 OK):**
   ```json
   {
-    "model-name": "LinearRegression",
-    "cement": 540.0,
-    "slag": 0.0,
-    "fly_ash": 0.0,
-    "water": 162.0,
-    "superplasticizer": 2.5,
-    "coarse_aggregate": 1040.0,
-    "fine_aggregate": 676.0,
-    "age": 28.0
+    "status": "Ok",
+    "message": "Sample test records retrieved successfully",
+    "dataset": "concrete",
+    "data": {
+      "dataset_id": "concrete",
+      "name": "Concrete Compressive Strength",
+      "samples": [
+        {
+          "id": "concrete-sample-1",
+          "row_index": 1,
+          "title": "Concrete Mixture Batch #1 (High Strength)",
+          "description": "Cement: 540.0 kg/m³, Water: 162.0 kg/m³, Curing Age: 28 days.",
+          "actual_target": 79.99,
+          "ground_truth": "79.99 MPa Compressive Strength",
+          "data": {
+            "cement": 540.0,
+            "slag": 0.0,
+            "fly_ash": 0.0,
+            "water": 162.0,
+            "superplasticizer": 2.5,
+            "coarse_aggregate": 1040.0,
+            "fine_aggregate": 676.0,
+            "age": 28.0
+          }
+        }
+      ]
+    }
   }
   ```
-* **Response Output:** Returns the predicted strength in Megapascals (`Prediction`) and the model metrics.
 
-### 3. California Housing Prices
-* **URL:** `/predict/california-housing/`
-* **Models:** `LinearRegression`, `Ridge`, `KNeighborsRegressor`, `DecisionTreeRegressor`, `SVR`
-* **Features:** `MedInc`, `HouseAge`, `AveRooms`, `AveBedrms`, `Population`, `AveOccup`, `Latitude`, `Longitude` (all floats).
-* **Sample Request (JSON):**
-  ```json
-  {
-    "model-name": "LinearRegression",
-    "MedInc": 8.32,
-    "HouseAge": 41.0,
-    "AveRooms": 6.98,
-    "AveBedrms": 1.02,
-    "Population": 322.0,
-    "AveOccup": 2.55,
-    "Latitude": 37.88,
-    "Longitude": -122.23
-  }
-  ```
-* **Response Output:** Returns the median block value in hundreds of thousands of USD (`Prediction`).
+---
 
-### 4. Diabetes Risk Classification
-* **URL:** `/predict/diabetes/`
-* **Models:** `LogisticRegression`, `KNeighborsClassifier`, `DecisionTreeClassifier`, `SVC`
-* **Features:** `age`, `bmi`, `glucose_fasting`, `hba1c`, `physical_activity_minutes_per_week`, `cardiovascular_history` (floats); `family_history_diabetes`, `hypertension_history` (`"1"` or `"0"`); `gender` (`"Male"`, `"Female"`, `"Other"`); `smoking_status` (`"Never"`, `"Former"`, `"Current"`).
+## 4. Prediction Endpoints
+
+### 1. Heart Disease Classification
+* **Endpoint:** `POST /predict/heart/`
+* **Supported Models:** `LogisticRegression`, `KNeighborsClassifier`, `DecisionTreeClassifier`, `SVC`
+* **Features:**
+  * `model-name` *(string, required)*
+  * `age` *(float)*, `sex` *(1 = Male, 0 = Female)*, `cp` *(chest pain 0-3)*, `trestbps` *(resting blood pressure)*
+  * `chol` *(serum cholesterol)*, `fbs` *(fasting blood sugar > 120 mg/dl: 1 or 0)*, `restecg` *(resting ECG 0-2)*
+  * `thalach` *(max heart rate)*, `exang` *(exercise angina: 1 or 0)*, `oldpeak` *(ST depression)*
+  * `slope` *(slope of peak ST segment 0-2)*, `ca` *(major vessels colored by fluoroscopy 0-3)*, `thal` *(thalassemia 1-3)*
 * **Sample Request (JSON):**
   ```json
   {
     "model-name": "LogisticRegression",
-    "age": 58,
-    "bmi": 30.0,
-    "family_history_diabetes": "0",
-    "hypertension_history": "0",
-    "glucose_fasting": 136,
-    "hba1c": 8.18,
-    "physical_activity_minutes_per_week": 215,
-    "cardiovascular_history": "0",
-    "gender": "Male",
-    "smoking_status": "Never"
-  }
-  ```
-* **Response Output:** Returns risk classification (`Prediction`: `1` for risk, `0` otherwise).
-
-### 5. Heart Disease Classification
-* **URL:** `/predict/heart/`
-* **Models:** `LogisticRegression`, `KNeighborsClassifier`, `DecisionTreeClassifier`, `SVC`
-* **Features:** `age`, `sex` (`1`=M, `0`=F), `cp` (chest pain `0`-`3`), `trestbps`, `chol`, `fbs` (`1` or `0`), `restecg`, `thalach`, `exang`, `oldpeak`, `slope`, `ca`, `thal` (all floats).
-* **Sample Request (JSON):**
-  ```json
-  {
-    "model-name": "LogisticRegression",
-    "age": 52,
-    "sex": 0,
-    "cp": 2,
-    "trestbps": 136,
-    "chol": 196,
+    "age": 55,
+    "sex": 1,
+    "cp": 0,
+    "trestbps": 140,
+    "chol": 240,
     "fbs": 0,
     "restecg": 0,
-    "thalach": 169,
+    "thalach": 150,
     "exang": 0,
-    "oldpeak": 0.1,
+    "oldpeak": 1.2,
     "slope": 1,
     "ca": 0,
     "thal": 2
   }
   ```
-* **Response Output:** Returns heart disease classification (`Prediction`: `1` or `0`).
+* **Sample Response (200 OK):**
+  ```json
+  {
+    "status": "Ok",
+    "message": "Success",
+    "model-name": "LogisticRegression",
+    "output": {
+      "Prediction": 0,
+      "model-accuracy": {
+        "accuracy_score": 0.7763,
+        "recall_score": 0.8889,
+        "f1_score": 0.7901
+      }
+    }
+  }
+  ```
 
 ---
 
-## 3. Sample Response Format (200 OK)
+### 2. Diabetes Risk Prediction
+* **Endpoint:** `POST /predict/diabetes/`
+* **Supported Models:** `LogisticRegression`, `KNeighborsClassifier`, `DecisionTreeClassifier`, `SVC`
+* **Features:**
+  * `model-name` *(string, required)*
+  * `age` *(float)*, `bmi` *(float)*, `glucose_fasting` *(float)*, `hba1c` *(float)*
+  * `physical_activity_minutes_per_week` *(float)*, `cardiovascular_history` *(0 or 1)*
+  * `family_history_diabetes` *(string: "1" or "0")*, `hypertension_history` *(string: "1" or "0")*
+  * `gender` *(string: "Male", "Female", or "Other")*, `smoking_status` *(string: "Never", "Former", or "Current")*
+* **Sample Request (JSON):**
+  ```json
+  {
+    "model-name": "DecisionTreeClassifier",
+    "age": 45,
+    "bmi": 28.5,
+    "glucose_fasting": 110,
+    "hba1c": 5.8,
+    "physical_activity_minutes_per_week": 150,
+    "cardiovascular_history": 0,
+    "family_history_diabetes": "1",
+    "hypertension_history": "0",
+    "gender": "Male",
+    "smoking_status": "Never"
+  }
+  ```
+* **Sample Response (200 OK):**
+  ```json
+  {
+    "status": "Ok",
+    "message": "Success",
+    "model-name": "DecisionTreeClassifier",
+    "output": {
+      "Prediction": 1,
+      "model-accuracy": {
+        "accuracy_score": 0.9204,
+        "recall_score": 0.867,
+        "f1_score": 0.9288
+      }
+    }
+  }
+  ```
 
-All APIs return a standard success response containing the prediction result and model accuracy metrics:
+---
+
+### 3. California Housing Price Regression
+* **Endpoint:** `POST /predict/california-housing/`
+* **Supported Models:** `LinearRegression`, `Ridge`, `KNeighborsRegressor`, `DecisionTreeRegressor`, `SVR`
+* **Features:**
+  * `model-name` *(string, required)*
+  * `MedInc` *(median income in block, tens of thousands)*, `HouseAge` *(median house age in years)*
+  * `AveRooms` *(average rooms per household)*, `AveBedrms` *(average bedrooms per household)*
+  * `Population` *(block population)*, `AveOccup` *(average occupancy per household)*
+  * `Latitude` *(latitude float)*, `Longitude` *(longitude float)*
+* **Sample Request (JSON):**
+  ```json
+  {
+    "model-name": "SVR",
+    "MedInc": 3.5,
+    "HouseAge": 25,
+    "AveRooms": 5.2,
+    "AveBedrms": 1.1,
+    "Population": 1200,
+    "AveOccup": 3.1,
+    "Latitude": 34.2,
+    "Longitude": -118.4
+  }
+  ```
+* **Sample Response (200 OK):**
+  ```json
+  {
+    "status": "Ok",
+    "message": "Success",
+    "model-name": "SVR",
+    "output": {
+      "Prediction": 1.9964,
+      "model-accuracy": {
+        "r2_score": 0.7416,
+        "mean_absolute_error": 0.3924,
+        "mean_squared_error": 0.3526
+      }
+    }
+  }
+  ```
+
+---
+
+### 4. Concrete Compressive Strength Prediction
+* **Endpoint:** `POST /predict/concrete/`
+* **Supported Models:** `LinearRegression`, `Ridge`, `KNeighborsRegressor`, `DecisionTreeRegressor`, `SVR`
+* **Features:**
+  * `model-name` *(string, required)*
+  * `cement` *(kg/m³)*, `slag` *(blast furnace slag, kg/m³)*, `fly_ash` *(kg/m³)*
+  * `water` *(kg/m³)*, `superplasticizer` *(kg/m³)*, `coarse_aggregate` *(kg/m³)*
+  * `fine_aggregate` *(sand, kg/m³)*, `age` *(curing age in days)*
+* **Sample Request (JSON):**
+  ```json
+  {
+    "model-name": "SVR",
+    "cement": 250.0,
+    "slag": 100.0,
+    "fly_ash": 50.0,
+    "water": 180.0,
+    "superplasticizer": 2.5,
+    "coarse_aggregate": 900.0,
+    "fine_aggregate": 750.0,
+    "age": 28.0
+  }
+  ```
+* **Sample Response (200 OK):**
+  ```json
+  {
+    "status": "Ok",
+    "message": "Success",
+    "model-name": "SVR",
+    "output": {
+      "Prediction": 29.28,
+      "model-accuracy": {
+        "r2_score": 0.8867,
+        "mean_absolute_error": 3.9354,
+        "mean_squared_error": 30.7083
+      }
+    }
+  }
+  ```
+
+---
+
+### 5. Automobile Price Prediction
+* **Endpoint:** `POST /predict/auto-price/`
+* **Supported Models:** `LinearRegression`, `Ridge`, `KNeighborsRegressor`, `DecisionTreeRegressor`, `SVR`
+* **Features:**
+  * `model-name` *(string, required)*
+  * `horsepower` *(hp)*, `curb-weight` *(lbs)*, `engine-size` *(cubic inches)*
+  * `highway-mpg` *(mpg)*, `city-mpg` *(mpg)*, `wheel-base` *(inches)*
+  * `length` *(inches)*, `width` *(inches)*
+* **Sample Request (JSON):**
+  ```json
+  {
+    "model-name": "DecisionTreeRegressor",
+    "horsepower": 110.0,
+    "curb-weight": 2500.0,
+    "engine-size": 130.0,
+    "highway-mpg": 30.0,
+    "city-mpg": 24.0,
+    "wheel-base": 98.8,
+    "length": 175.5,
+    "width": 65.5
+  }
+  ```
+* **Sample Response (200 OK):**
+  ```json
+  {
+    "status": "Ok",
+    "message": "Success",
+    "model-name": "DecisionTreeRegressor",
+    "output": {
+      "Prediction": 13381.34,
+      "model-accuracy": {
+        "r2_score": 0.9246,
+        "mean_absolute_error": 1712.8521,
+        "mean_squared_error": 5877138.0836
+      }
+    }
+  }
+  ```
+
+---
+
+## 5. Error Handling & HTTP Status Codes
+
+The API always returns structured JSON payloads for errors:
+
+| Status Code | Type | Meaning & Action |
+| :--- | :--- | :--- |
+| `200 OK` | Success | Inference succeeded; output payload contains numeric prediction and accuracy scores. |
+| `400 Bad Request` | Client Error | Malformed JSON body, missing `"model-name"`, or invalid model name specified. |
+| `405 Method Not Allowed` | Routing Error | HTTP method was not `POST` for predictions or `GET` for benchmarks/samples. |
+| `422 Unprocessable Entity` | Validation Error | One or more required feature fields are missing or non-numeric. Check the `errors` array. |
+| `500 Internal Server Error` | Engine Error | Exception inside prediction runtime / scaler transformation. |
+
+### Example 422 Validation Error:
 ```json
 {
-  "status": "Ok",
-  "message": "Success",
+  "status": "Unprocessable Entity",
+  "message": "Input validation failed. Please check the errors field for details.",
+  "errors": [
+    "Field 'horsepower' is required.",
+    "Field 'engine-size' must be numeric (received: 'abc')."
+  ],
   "model-name": "LinearRegression",
   "output": {
-    "Prediction": 13495.0,
-    "model-accuracy": {
-      "r2_score": 0.799,
-      "mean_absolute_error": 2815.49,
-      "mean_squared_error": 15659145.59
-    }
+    "model_id": 1,
+    "prediction": "null"
   }
 }
 ```
-
----
-
-## 4. Handling Error Responses
-
-When something goes wrong, the API outputs a clean JSON response rather than letting the server crash:
-
-* **`400 Bad Request`**
-  * **Invalid JSON:** Your JSON payload is broken (missing commas, quotes, etc.).
-  * **Missing / Wrong Model Name:** Ensure `"model-name"` is provided and is one of the supported models.
-  * **Sample Response:**
-    ```json
-    {
-      "status": "Bad Request",
-      "message": "Missing required field: 'model-name'.",
-      "output": {
-        "model_id": null,
-        "prediction": "null"
-      }
-    }
-    ```
-
-* **`422 Unprocessable Content`**
-  * **Missing parameters or non-numeric types:** You missed a field or passed text where a number belongs.
-  * **Sample Response:**
-    ```json
-    {
-      "status": "Unprocessable Entity",
-      "message": "Input validation failed.",
-      "errors": [
-        "Field 'horsepower' is required."
-      ],
-      "model-name": "LinearRegression",
-      "output": {
-        "model_id": 1,
-        "prediction": "null"
-      }
-    }
-    ```
-
-* **`500 Internal Server Error`**
-  * **System Error:** The server couldn't load the model file. Check Django terminal logs for the traceback.
